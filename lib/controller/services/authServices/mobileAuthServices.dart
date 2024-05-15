@@ -4,16 +4,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delievery_domiciliario/constant/constant.dart';
 import 'package:food_delievery_domiciliario/controller/provider/authProvider/MobileAuthProvider.dart';
+import 'package:food_delievery_domiciliario/controller/services/profileServices/profileServices.dart';
 import 'package:food_delievery_domiciliario/view/authScreens/mobileLoginScreen.dart';
 import 'package:food_delievery_domiciliario/view/authScreens/otpScreen.dart';
 import 'package:food_delievery_domiciliario/view/bottomNavigationBar/bottomNavigationBar.dart';
+import 'package:food_delievery_domiciliario/view/driverRegistrationScreen/driverRegistrationScreen.dart';
 import 'package:food_delievery_domiciliario/view/signInLogicScreen/signInLoginScreen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 class MobileAuthServices {
-  static bool checkAuthentication(BuildContext context) {
+  static checkAuthentication(BuildContext context) {
     User? user = auth.currentUser;
     if (user == null) {
       Navigator.pushAndRemoveUntil(
@@ -22,15 +24,8 @@ class MobileAuthServices {
           (route) => false);
       return false;
     }
-    //checkUserRegistration(context: context);
-    Navigator.pushAndRemoveUntil(
-            context,
-            PageTransition(
-                child: const BottomNavigationBarDelievery(),
-                type: PageTransitionType.rightToLeft),
-            (route) => false,
-          );
-    return true;
+    checkUserRegistration(context: context);
+    
   }
 
   static recieveOTP(
@@ -85,16 +80,10 @@ class MobileAuthServices {
   }
 
   static checkUserRegistration({required BuildContext context}) async {
-    bool userIsRegistered = false;
     try {
-      await firestore
-          .collection('User')
-          .where('userID', isEqualTo: auth.currentUser!.uid)
-          .get()
-          .then((value) {
-        value.size > 0 ? userIsRegistered = true : userIsRegistered = false;
-        log('El usuario ya está registrado = $userIsRegistered');
+      bool userIsRegistered = await ProfileServices.checkForRegistration();
         if (userIsRegistered) {
+          // ignore: use_build_context_synchronously
           Navigator.pushAndRemoveUntil(
             context,
             PageTransition(
@@ -103,15 +92,15 @@ class MobileAuthServices {
             (route) => false,
           );
         } else {
+          // ignore: use_build_context_synchronously
           Navigator.pushAndRemoveUntil(
             context,
             PageTransition(
-                child: const BottomNavigationBarDelievery(),
+                child: const DriverRegistrationScreen(),
                 type: PageTransitionType.rightToLeft),
             (route) => false,
           );
         }
-      });
     } catch (e) {
       log(e.toString());
       throw Exception(e);
