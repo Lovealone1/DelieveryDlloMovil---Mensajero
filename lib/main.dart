@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:food_delievery_domiciliario/controller/provider/authProvider/MobileAuthProvider.dart';
 import 'package:food_delievery_domiciliario/controller/provider/profileProvider/profileProvider.dart';
 import 'package:food_delievery_domiciliario/firebase_options.dart';
-import 'package:food_delievery_domiciliario/view/driverRegistrationScreen/driverRegistrationScreen.dart';
+//import 'package:food_delievery_domiciliario/view/driverRegistrationScreen/driverRegistrationScreen.dart';
+import 'package:food_delievery_domiciliario/view/signInLogicScreen/signInLoginScreen.dart';
 //import 'package:food_delievery_domiciliario/view/signInLogicScreen/signInLoginScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
@@ -36,8 +37,8 @@ class FoodDelievery extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Flutter Demo',
           theme: ThemeData(),
-          //home: const SignInLogicScreen(),
-          home: DriverRegistrationScreen(),
+          home: const SignInLogicScreen(),
+          //home: DriverRegistrationScreen(),
         ),
       );
     });
