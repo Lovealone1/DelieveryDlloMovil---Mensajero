@@ -92,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       elevationTrack: 2,
                       onSwipe: () {
                         GeofireServices.goOnline();
+                        GeofireServices.updateLocationRealtime(context);
                       },
                       child: Text(
                         'Empezar!',

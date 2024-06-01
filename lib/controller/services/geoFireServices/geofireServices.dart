@@ -41,6 +41,7 @@ class GeofireServices {
       accuracy: LocationAccuracy.bestForNavigation,
       distanceFilter: 10,
     );
+    // ignore: unused_local_variable
     StreamSubscription<Position> driverPositionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((event) {

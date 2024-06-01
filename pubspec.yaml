@@ -37,6 +37,8 @@ dependencies:
   google_sign_in: ^6.2.1
   firebase_database: ^10.4.9
   flutter_swipe_button: ^2.1.1+1
+  firebase_messaging: ^14.7.19
+  
 
 dev_dependencies:
   flutter_test:
@@ -44,13 +46,20 @@ dev_dependencies:
 
 
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
 
+flutter_launcher_icons:
+  android: true
+  os: true
+  image_path: "assets/images/appIcon/logo.png"
+  adaptive_icon_foreground: "assets/images/appIcon/logo.png"
 
 flutter:
 
   uses-material-design: true
   assets:
     - assets/images/splashScreenImage/
+    - assets/images/appIcon/logo.png
   fonts: 
     - family: UberMoveMedium
       fonts: 
