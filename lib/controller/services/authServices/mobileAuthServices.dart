@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:food_delievery_domiciliario/constant/constant.dart';
 import 'package:food_delievery_domiciliario/controller/provider/authProvider/MobileAuthProvider.dart';
 import 'package:food_delievery_domiciliario/controller/services/profileServices/profileServices.dart';
+import 'package:food_delievery_domiciliario/controller/services/pushNotificationServices/pushNotificationServices.dart';
 import 'package:food_delievery_domiciliario/view/authScreens/mobileLoginScreen.dart';
 import 'package:food_delievery_domiciliario/view/authScreens/otpScreen.dart';
 import 'package:food_delievery_domiciliario/view/bottomNavigationBar/bottomNavigationBar.dart';
@@ -84,6 +85,7 @@ class MobileAuthServices {
       bool userIsRegistered = await ProfileServices.checkForRegistration();
         if (userIsRegistered) {
           // ignore: use_build_context_synchronously
+          PushNotificationServices.initializeFCM();
           Navigator.pushAndRemoveUntil(
             context,
             PageTransition(
