@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:covefood_domiciliario/constant/constant.dart';
+import 'package:covefood_domiciliario/controller/provider/rideProvider/rideProvider.dart';
 import 'package:covefood_domiciliario/controller/services/geoFireServices/geofireServices.dart';
 import 'package:covefood_domiciliario/controller/services/locationServices/locationServices.dart';
 import 'package:covefood_domiciliario/controller/services/orderServices/orderServices.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -130,63 +132,79 @@ class _HomeScreenState extends State<HomeScreen> {
                               jsonDecode(jsonEncode(
                                       foodOrderEvent.data!.snapshot.value))
                                   as Map<String, dynamic>);
-                              return Builder(builder: (context){
-                                if(foodOrderData.orderStatus == OrderServices.orderStatus(0)){
-                                  return Expanded(
-                      child: GoogleMap(
-                        initialCameraPosition: initialCameraPosition,
-                        mapType: MapType.normal,
-                        myLocationButtonEnabled: true,
-                        myLocationEnabled: true,
-                        zoomControlsEnabled: true,
-                        zoomGesturesEnabled: true,
-                        onMapCreated: (GoogleMapController controller) async {
-                          googleMapController.complete(controller);
-                          mapController = controller;
-                          Position currentPosition =
-                              await LocationServices.getCurrentLocation();
-                          LatLng currentLatLong = LatLng(
-                            currentPosition.latitude,
-                            currentPosition.longitude,
-                          );
-                          CameraPosition cameraPosition = CameraPosition(
-                            target: currentLatLong,
-                            zoom: 14,
-                          );
-                          mapController!.animateCamera(
-                              CameraUpdate.newCameraPosition(cameraPosition));
-                        },
-                      ),
-                    );
-                                }else{
-                                  return Expanded(
-                      child: GoogleMap(
-                        initialCameraPosition: initialCameraPosition,
-                        mapType: MapType.normal,
-                        myLocationButtonEnabled: true,
-                        myLocationEnabled: true,
-                        zoomControlsEnabled: true,
-                        zoomGesturesEnabled: true,
-                        onMapCreated: (GoogleMapController controller) async {
-                          googleMapController.complete(controller);
-                          mapController = controller;
-                          Position currentPosition =
-                              await LocationServices.getCurrentLocation();
-                          LatLng currentLatLong = LatLng(
-                            currentPosition.latitude,
-                            currentPosition.longitude,
-                          );
-                          CameraPosition cameraPosition = CameraPosition(
-                            target: currentLatLong,
-                            zoom: 14,
-                          );
-                          mapController!.animateCamera(
-                              CameraUpdate.newCameraPosition(cameraPosition));
-                        },
-                      ),
-                    );
-                                }
-                              });
+                          return Builder(builder: (context) {
+                            if (foodOrderData.orderStatus ==
+                                OrderServices.orderStatus(0)) {
+                              return Expanded(child: Consumer<RideProvider>(
+                                  builder: (context, rideProvider, child) {
+                                return GoogleMap(
+                                  initialCameraPosition: initialCameraPosition,
+                                  mapType: MapType.normal,
+                                  myLocationButtonEnabled: true,
+                                  myLocationEnabled: true,
+                                  zoomControlsEnabled: true,
+                                  zoomGesturesEnabled: true,
+                                  polylines:
+                                      rideProvider.polylineSetTowardsResturant,
+                                  markers: rideProvider.deliveryMarker,
+                                  onMapCreated:
+                                      (GoogleMapController controller) async {
+                                    googleMapController.complete(controller);
+                                    mapController = controller;
+                                    Position currentPosition =
+                                        await LocationServices
+                                            .getCurrentLocation();
+                                    LatLng currentLatLong = LatLng(
+                                      currentPosition.latitude,
+                                      currentPosition.longitude,
+                                    );
+                                    CameraPosition cameraPosition =
+                                        CameraPosition(
+                                      target: currentLatLong,
+                                      zoom: 14,
+                                    );
+                                    mapController!.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                            cameraPosition));
+                                  },
+                                );
+                              }));
+                            } else {
+                              return Expanded(child: Consumer<RideProvider>(
+                                  builder: (context, rideProvider, child) {
+                                return GoogleMap(
+                                  initialCameraPosition: initialCameraPosition,
+                                  mapType: MapType.normal,
+                                  myLocationButtonEnabled: true,
+                                  myLocationEnabled: true,
+                                  zoomControlsEnabled: true,
+                                  zoomGesturesEnabled: true,
+                                  polylines: rideProvider.polylineSetTowardsDelivery,
+                                  markers: rideProvider.deliveryMarker,
+                                  onMapCreated:
+                                      (GoogleMapController controller) async {
+                                    googleMapController.complete(controller);
+                                    mapController = controller;
+                                    Position currentPosition =
+                                        await LocationServices
+                                            .getCurrentLocation();
+                                    LatLng currentLatLong = LatLng(
+                                      currentPosition.latitude,
+                                      currentPosition.longitude,
+                                    );
+                                    CameraPosition cameraPosition =
+                                        CameraPosition(
+                                      target: currentLatLong,
+                                      zoom: 14,
+                                    );
+                                    mapController!.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                            cameraPosition));
+                                  },
+                                );
+                              }));
+                            }
+                          });
                         } else {
                           return Center(
                             child: CircularProgressIndicator(color: black),

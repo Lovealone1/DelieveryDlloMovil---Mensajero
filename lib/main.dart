@@ -1,4 +1,5 @@
 import 'package:covefood_domiciliario/controller/provider/authProvider/MobileAuthProvider.dart';
+import 'package:covefood_domiciliario/controller/provider/orderProvider/orderProvider.dart';
 import 'package:covefood_domiciliario/controller/provider/profileProvider/profileProvider.dart';
 import 'package:covefood_domiciliario/controller/provider/rideProvider/rideProvider.dart';
 import 'package:covefood_domiciliario/firebase_options.dart';
@@ -32,6 +33,9 @@ class FoodDelievery extends StatelessWidget {
           ),
           ChangeNotifierProvider<RideProvider>(
             create: (_) => RideProvider(),
+          ),
+          ChangeNotifierProvider<OrderProvider>(
+            create: (_) => OrderProvider(),
           ),
           
         ],

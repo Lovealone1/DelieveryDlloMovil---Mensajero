@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:covefood_domiciliario/constant/constant.dart';
+import 'package:covefood_domiciliario/controller/provider/orderProvider/orderProvider.dart';
 import 'package:covefood_domiciliario/controller/provider/rideProvider/rideProvider.dart';
 import 'package:covefood_domiciliario/controller/services/locationServices/locationServices.dart';
 import 'package:covefood_domiciliario/controller/services/orderServices/orderServices.dart';
@@ -99,7 +100,7 @@ class PushNotificationDialog {
                       activeTrackColor: Colors.green.shade200,
                       elevationThumb: 2,
                       elevationTrack: 2,
-                      onSwipe: ()async {
+                      onSwipe: () async {
                         Position delieveryGuyPosition =
                             await LocationServices.getCurrentLocation();
                         LatLng delieveryGuy = LatLng(
@@ -112,12 +113,26 @@ class PushNotificationDialog {
                         LatLng delievery = LatLng(
                             foodOrderData.userAddress!.latitude,
                             foodOrderData.userAddress!.longitude);
-                        context.read<RideProvider>().updateDelieveryLatLngs(
+                        context.read<RideProvider>().updateDeliveryLatLngs(
                             delieveryGuy, restaurant, delievery);
 
-                        OrderServices.updateDriverProfileIntoFoodOrderModel(orderID, context);
-                        context.read<RideProvider>().fetchCurrentLocationToRestaurantPolyline(context);
-                        context.read<RideProvider>().fetchRestaurantLocationToDelieveryPolyline(context);
+                        OrderServices.updateDriverProfileIntoFoodOrderModel(
+                            orderID, context);
+                        context
+                            .read<RideProvider>()
+                            .fetchCrrLocationToResturantPoliline(context);
+                        context
+                            .read<RideProvider>()
+                            .fetchResturantToDeliveryPoliline(context);
+                        FoodOrderModel orderData =
+                            await OrderServices.fetchOrderDetails(orderID);
+                        context.read<RideProvider>().updateOrderData(orderData);
+
+                        context
+                            .read<OrderProvider>()
+                            .updateFoodOrderData(orderData);
+                        context.read<RideProvider>().updateInDeliveryStatus(true);
+                        context.read<RideProvider>().updateMarker(context);
                         audioPlayer.stop();
                         Navigator.pop(context);
                       },
