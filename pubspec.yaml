@@ -60,6 +60,7 @@ flutter:
     - assets/images/splashScreenImage/
     - assets/images/appIcon/logo.png
     - assets/sounds/
+    - assets/images/ride/
   fonts: 
     - family: UberMoveMedium
       fonts: 

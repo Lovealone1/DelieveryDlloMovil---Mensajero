@@ -1,4 +1,5 @@
 import 'package:covefood_domiciliario/controller/provider/profileProvider/profileProvider.dart';
+import 'package:covefood_domiciliario/controller/provider/rideProvider/rideProvider.dart';
 import 'package:covefood_domiciliario/controller/services/pushNotificationServices/pushNotificationServices.dart';
 import 'package:covefood_domiciliario/utils/colors.dart';
 import 'package:covefood_domiciliario/view/accountScreen/accountScreen.dart';
@@ -25,6 +26,7 @@ class _BottomNavigationBarDelieveryState
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       PushNotificationServices.initializeFCM(context);
       context.read<ProfileProvider>().updateDriverProfile();
+      context.read<RideProvider>().createIcons(context);
     });
   }
 

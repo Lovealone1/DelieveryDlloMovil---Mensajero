@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously, prefer_collection_literals
+
+import 'dart:developer';
 import 'package:covefood_domiciliario/controller/services/directionServices/directionServices.dart';
+import 'package:covefood_domiciliario/controller/services/locationServices/locationServices.dart';
+import 'package:covefood_domiciliario/controller/services/orderServices/orderServices.dart';
 import 'package:covefood_domiciliario/model/directionModel.dart';
 import 'package:covefood_domiciliario/model/foodOrderModel.dart';
 import 'package:covefood_domiciliario/utils/colors.dart';
@@ -7,40 +12,57 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+
 class RideProvider extends ChangeNotifier {
   Position? currentPosition;
-  LatLng? delieveryGuyLocation;
-  LatLng? restaurantLocation;
-  LatLng? delieveryLocation;
+  // ! Google Maps Variable
+  LatLng? deliveryGuyLocation;
+  LatLng? deliveryLocation;
+  Set<Marker> deliveryMarker = Set<Marker>();
   FoodOrderModel? orderData;
-  Set<Polyline> polylineSetTowardsRestaurant = {};
-  Polyline? polylineTowardsRestaurant;
-  List<LatLng> polylineCoordinatesListTowardsRestaurant = [];
 
-  Set<Polyline> polylinesSetTowardsDelievery = {};
-  Polyline? polylinesTowardsDelievery;
-  List<LatLng> polylineCoordinatesListTowardsDelievery = [];
+  // Marker
+  BitmapDescriptor? destinationIcon;
+  BitmapDescriptor? crrLocationIcon;
+  bool inDelivery = false;
+  List<LatLng> polylineCoordinatesListTowardsDelivery = [];
+  List<LatLng> polylineCoordinatesListTowardsResturant = [];
 
-  updateCurrentPosition(Position crrPosition) {
+  // Map Polyline Towards Delivery Location
+  Set<Polyline> polylineSetTowardsDelivery = {};
+  //  Map Polyline Towards Resturant
+  Set<Polyline> polylineSetTowardsResturant = {};
+  Polyline? polylineTowardsDelivery;
+  Polyline? polylineTowardsResturant;
+  LatLng? resturantLoaction;
+
+  updateOrderData(FoodOrderModel data) {
+    orderData = data;
+    notifyListeners();
+  }
+
+  updateInDeliveryStatus(bool newStatus) {
+    inDelivery = newStatus;
+    notifyListeners();
+  }
+
+  updateCurrentPositon(Position crrPosition) {
     currentPosition = crrPosition;
     notifyListeners();
   }
 
-  updateDelieveryLatLngs(
-      LatLng delieveryGuy, LatLng restaurant, LatLng delievery) {
-    delieveryGuyLocation = delieveryGuy;
-    restaurantLocation = delieveryGuy;
-    delieveryLocation = delievery;
+  updateDeliveryLatLngs(LatLng deliveryGuy, LatLng resturant, LatLng delivery) {
+    deliveryGuyLocation = deliveryGuy;
+    resturantLoaction = resturant;
+    deliveryLocation = delivery;
     notifyListeners();
   }
-  updateOrderData(FoodOrderModel data) {
-      orderData = data;
-      notifyListeners();
-    }
+
   decodePolyline(String encodedPolyline) {
     PolylinePoints polylinePoints = PolylinePoints();
     List<PointLatLng> data = polylinePoints.decodePolyline(encodedPolyline);
     List<LatLng> polylineCoordinatesList = [];
+
     if (data.isNotEmpty) {
       for (var latLngPoints in data) {
         polylineCoordinatesList.add(
@@ -51,8 +73,8 @@ class RideProvider extends ChangeNotifier {
         );
       }
     }
-    Polyline polyline = Polyline(
-      polylineId: const PolylineId('polilyne'),
+    Polyline poliline = Polyline(
+      polylineId: const PolylineId('poliline'),
       color: black,
       points: polylineCoordinatesList,
       jointType: JointType.round,
@@ -61,30 +83,104 @@ class RideProvider extends ChangeNotifier {
       endCap: Cap.roundCap,
       geodesic: true,
     );
-    return polyline;
+    return poliline;
   }
 
-  fetchCurrentLocationToRestaurantPolyline(BuildContext context) async {
-    polylineSetTowardsRestaurant.clear();
+  fetchCrrLocationToResturantPoliline(BuildContext context) async {
+    polylineSetTowardsResturant.clear();
     DirectionModel directionModel = await DirectionServices.getDirectionDetails(
-      delieveryGuyLocation!,
-      restaurantLocation!,
+      deliveryGuyLocation!,
+      resturantLoaction!,
       context,
     );
+
     Polyline polyline = decodePolyline(directionModel.polylinePoints);
-    polylineSetTowardsRestaurant.add(polyline);
+    polylineSetTowardsResturant.add(polyline);
     notifyListeners();
+    log(polyline.toString());
   }
 
-  fetchRestaurantLocationToDelieveryPolyline(BuildContext context) async {
-    polylinesSetTowardsDelievery.clear();
+  fetchResturantToDeliveryPoliline(BuildContext context) async {
+    polylineSetTowardsDelivery.clear();
     DirectionModel directionModel = await DirectionServices.getDirectionDetails(
-      restaurantLocation!,
-      delieveryGuyLocation!,
+      resturantLoaction!,
+      deliveryLocation!,
       context,
     );
     Polyline polyline = decodePolyline(directionModel.polylinePoints);
-    polylinesSetTowardsDelievery.add(polyline);
+    polylineSetTowardsDelivery.add(polyline);
+    notifyListeners();
+    log(polyline.toString());
+  }
+
+  createIcons(BuildContext context) {
+    // CurrentLocationIcon
+    ImageConfiguration imageConfigurationcrrLocation =
+        createLocalImageConfiguration(context, size: const Size(2, 2));
+    BitmapDescriptor.fromAssetImage(
+            imageConfigurationcrrLocation, 'assets/images/ride/crrLocation.png')
+        .then((icon) {
+      crrLocationIcon = icon;
+      notifyListeners();
+    });
+//  DestinationIcon
+    ImageConfiguration imageConfigurationdestinationLocation =
+        createLocalImageConfiguration(context, size: const Size(2, 2));
+    BitmapDescriptor.fromAssetImage(imageConfigurationdestinationLocation,
+            'assets/images/ride/destination.png')
+        .then((icon) {
+      destinationIcon = icon;
+      notifyListeners();
+    });
+    log('Icons Created');
+  }
+
+  updateMarker(BuildContext context) async {
+    deliveryMarker = Set<Marker>();
+    Position crrPositon = await LocationServices.getCurrentLocation();
+    FoodOrderModel itemOrderData = orderData!;
+    LatLng resturantLocation = LatLng(
+        itemOrderData.restaurantDetails.address!.latitude!,
+        itemOrderData.restaurantDetails.address!.longitude!);
+    LatLng deliveryLocation = LatLng(itemOrderData.userAddress!.latitude,
+        itemOrderData.userAddress!.longitude);
+    Marker currentLocationMarker = Marker(
+      markerId: const MarkerId('CurrentDeliveryGuyLocation'),
+      position: LatLng(crrPositon.latitude, crrPositon.longitude),
+      icon: crrLocationIcon!,
+    );
+    log((itemOrderData.orderStatus == OrderServices.orderStatus(0)).toString());
+    Marker destinationMarker = Marker(
+      markerId: const MarkerId('DestinationLocation'),
+      position: itemOrderData.orderStatus == OrderServices.orderStatus(0)
+          ? resturantLocation
+          : deliveryLocation,
+      icon: destinationIcon!,
+    );
+    deliveryMarker.add(currentLocationMarker);
+    deliveryMarker.add(destinationMarker);
+    log(deliveryMarker.length.toString());
+    notifyListeners();
+    log('Markers Updated');
+    if (inDelivery) {
+      await Future.delayed(const Duration(seconds: 5), () async {
+        await updateMarker(context);
+      });
+    }
+  }
+
+  nullifyRideDatas() {
+    inDelivery = false;
+    polylineCoordinatesListTowardsDelivery = [];
+    polylineCoordinatesListTowardsResturant = [];
+    deliveryMarker = Set<Marker>();
+    polylineSetTowardsDelivery = {};
+    polylineSetTowardsResturant = {};
+    polylineTowardsDelivery = null;
+    polylineTowardsResturant = null;
+    resturantLoaction = null;
+    deliveryLocation = null;
+    orderData = null;
     notifyListeners();
   }
 }

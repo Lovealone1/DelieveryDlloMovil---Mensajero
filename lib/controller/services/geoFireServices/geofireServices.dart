@@ -50,7 +50,7 @@ class GeofireServices {
         event.latitude,
         event.longitude,
       );
-      context.read<RideProvider>().updateCurrentPosition(event);
+      context.read<RideProvider>().updateCurrentPositon(event);
     });
   }
 }
